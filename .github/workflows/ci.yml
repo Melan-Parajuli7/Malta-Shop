@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install order-service
+        working-directory: ./order-service
+        run: npm ci
+
+      - name: Install inventory-service
+        working-directory: ./inventory-service
+        run: npm ci
+
+      - name: Install shared tests
+        working-directory: ./tests
+        run: npm ci
+
+      - name: Run order-service tests
+        working-directory: ./order-service
+        run: npm test
+
+      - name: Run inventory-service tests
+        working-directory: ./inventory-service
+        run: npm test
+
+      - name: Run contract tests
+        working-directory: ./tests
+        run: npm test
+
+      - name: Build Docker images
+        run: |
+          docker build -t order-service ./order-service
+          docker build -t inventory-service ./inventory-service
