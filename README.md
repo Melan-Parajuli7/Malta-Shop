@@ -31,4 +31,5 @@ Minimal working demonstration of a **choreographed saga** for the “place an or
 # Clone and start everything
 git clone <your-repo-url>
 cd maltashop
+
 docker compose up --build
