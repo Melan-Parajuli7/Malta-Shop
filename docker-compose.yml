@@ -15,8 +15,8 @@ services:
   postgres-order:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: order
-      POSTGRES_PASSWORD: order
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: melan@9812
       POSTGRES_DB: orders
     volumes:
       - order-data:/var/lib/postgresql/data
@@ -29,8 +29,8 @@ services:
   postgres-inventory:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: inventory
-      POSTGRES_PASSWORD: inventory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: melan@9812
       POSTGRES_DB: inventory
     volumes:
       - inventory-data:/var/lib/postgresql/data
