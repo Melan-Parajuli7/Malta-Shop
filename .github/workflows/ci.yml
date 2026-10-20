@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,21 +18,29 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install order-service
+      - name: Install order-service dependencies
         working-directory: ./order-service
-        run: npm install
+        run: npm ci
 
-      - name: Install inventory-service
+      - name: Install inventory-service dependencies
         working-directory: ./inventory-service
+        run: npm ci
+
+      - name: Install contract-test dependencies
+        working-directory: ./tests
         run: npm install
 
       - name: Run order-service tests
         working-directory: ./order-service
-        run: npm test -- --passWithNoTests
+        run: npm test -- --runInBand
 
       - name: Run inventory-service tests
         working-directory: ./inventory-service
-        run: npm test -- --passWithNoTests
+        run: npm test -- --runInBand
+
+      - name: Run contract tests
+        working-directory: ./tests
+        run: npm test -- --runInBand
 
       - name: Build Docker images
         run: |
