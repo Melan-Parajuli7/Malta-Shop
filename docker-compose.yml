@@ -1,8 +1,13 @@
-version: "3.8"
+# MaltaShop prototype: Order + Inventory services, each with its own PostgreSQL database,
+# connected only through RabbitMQ. Start everything with:  docker compose up --build
+# Every credential can be overridden from a .env file (see .env.example); the defaults are for a laptop only.
 
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -15,8 +20,8 @@ services:
   postgres-order:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: melan@9812
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD:-order}
       POSTGRES_DB: orders
     volumes:
       - order-data:/var/lib/postgresql/data
@@ -29,8 +34,8 @@ services:
   postgres-inventory:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: melan@9812
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: ${INVENTORY_DB_PASSWORD:-inventory}
       POSTGRES_DB: inventory
     volumes:
       - inventory-data:/var/lib/postgresql/data
@@ -46,14 +51,15 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      DATABASE_URL: postgres://order:order@postgres-order:5432/orders
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-      LOG_LEVEL: info
+      DATABASE_URL: postgres://order:${ORDER_DB_PASSWORD:-order}@postgres-order:5432/orders
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       rabbitmq:
         condition: service_healthy
       postgres-order:
-        condition: service_healthy 
+        condition: service_healthy
+    restart: unless-stopped
 
   inventory-service:
     build: ./inventory-service
@@ -61,14 +67,15 @@ services:
       - "3001:3001"
     environment:
       PORT: 3001
-      DATABASE_URL: postgres://inventory:inventory@postgres-inventory:5432/inventory
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
-      LOG_LEVEL: info
+      DATABASE_URL: postgres://inventory:${INVENTORY_DB_PASSWORD:-inventory}@postgres-inventory:5432/inventory
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       rabbitmq:
         condition: service_healthy
       postgres-inventory:
         condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   order-data:
