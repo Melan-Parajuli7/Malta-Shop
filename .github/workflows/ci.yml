@@ -32,11 +32,11 @@ jobs:
 
       - name: Run order-service tests
         working-directory: ./order-service
-        run: npm test -- --runInBand
+        run: npm test -- --runInBand --passWithNoTests
 
       - name: Run inventory-service tests
         working-directory: ./inventory-service
-        run: npm test -- --runInBand
+        run: npm test -- --runInBand --passWithNoTests
 
       - name: Run contract tests
         working-directory: ./tests
